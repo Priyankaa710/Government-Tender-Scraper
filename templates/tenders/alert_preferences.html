@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Alert Preferences{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-2xl mx-auto">
+  <div class="mb-6">
+    <p class="text-xs font-semibold tracking-widest text-royal uppercase mb-1">Notifications</p>
+    <h1 class="font-display font-800 text-2xl text-navy">Alert preferences</h1>
+    <p class="text-sm text-navy-400 mt-1">Choose when and about what Tender Trail should email you.</p>
+  </div>
+
+  <form method="post" class="bg-white rounded-xl border border-navy-100 p-6 space-y-5">
+    {% csrf_token %}
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      {{ form.enabled|add_class:"toggle toggle-success" }}
+      <span class="text-sm font-medium text-navy">Enable deadline reminder emails</span>
+    </label>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Notification email</label>
+      {{ form.email|add_class:"input input-bordered input-sm w-full mt-1" }}
+    </div>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Remind me before deadline (days)</label>
+      {{ form.remind_days_before|add_class:"input input-bordered input-sm w-full mt-1" }}
+      <p class="text-[11px] text-navy-400 mt-1">{{ form.remind_days_before.help_text }}</p>
+    </div>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Only alert for these categories</label>
+      {{ form.categories|add_class:"select select-bordered select-sm w-full mt-1 h-28" }}
+      <p class="text-[11px] text-navy-400 mt-1">Leave empty to include all categories.</p>
+    </div>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Only alert for these states</label>
+      {{ form.states|add_class:"select select-bordered select-sm w-full mt-1 h-28" }}
+      <p class="text-[11px] text-navy-400 mt-1">Leave empty to include all states.</p>
+    </div>
+
+    <button type="submit" class="btn bg-navy text-white border-none hover:bg-navy-400 w-full">Save preferences</button>
+  </form>
+
+  <div class="mt-4 text-xs text-navy-400 bg-navy-50/60 rounded-lg p-3">
+    Last notified: {{ pref.last_notified|date:"d M Y, H:i"|default:"Never yet" }}
+  </div>
+</div>
+{% endblock %}

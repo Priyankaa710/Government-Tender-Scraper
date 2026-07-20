@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Add Tender{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-3xl mx-auto">
+  <div class="mb-6">
+    <p class="text-xs font-semibold tracking-widest text-royal uppercase mb-1">Manual Entry</p>
+    <h1 class="font-display font-800 text-2xl text-navy">Add a tender</h1>
+    <p class="text-sm text-navy-400 mt-1">Use this if you have a tender to log by hand instead of waiting on the scraper.</p>
+  </div>
+
+  <form method="post" class="bg-white rounded-xl border border-navy-100 p-6 space-y-4">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="alert bg-urgent-50 text-urgent-600 border border-urgent/30 text-sm py-2">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-medium text-navy-400">Reference number</label>
+        {{ form.reference_no|add_class:"input input-bordered input-sm w-full mt-1" }}
+        <p class="text-[11px] text-navy-400 mt-1">{{ form.reference_no.help_text }}</p>
+        {% for error in form.reference_no.errors %}<p class="text-[11px] text-urgent mt-1">{{ error }}</p>{% endfor %}
+      </div>
+      <div>
+        <label class="text-xs font-medium text-navy-400">Department</label>
+        {{ form.department|add_class:"input input-bordered input-sm w-full mt-1" }}
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Title</label>
+      {{ form.title|add_class:"input input-bordered input-sm w-full mt-1" }}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-medium text-navy-400">Category</label>
+        {{ form.category|add_class:"select select-bordered select-sm w-full mt-1" }}
+      </div>
+      <div>
+        <label class="text-xs font-medium text-navy-400">State</label>
+        {{ form.state|add_class:"select select-bordered select-sm w-full mt-1" }}
+      </div>
+    </div>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Location</label>
+      {{ form.location|add_class:"input input-bordered input-sm w-full mt-1" }}
+    </div>
+
+    <div>
+      <label class="text-xs font-medium text-navy-400">Description</label>
+      {{ form.description|add_class:"textarea textarea-bordered w-full mt-1" }}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-medium text-navy-400">Estimated value (₹)</label>
+        {{ form.estimated_value|add_class:"input input-bordered input-sm w-full mt-1" }}
+      </div>
+      <div>
+        <label class="text-xs font-medium text-navy-400">EMD amount (₹)</label>
+        {{ form.emd_amount|add_class:"input input-bordered input-sm w-full mt-1" }}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-medium text-navy-400">Deadline</label>
+        {{ form.deadline|add_class:"input input-bordered input-sm w-full mt-1" }}
+        {% for error in form.deadline.errors %}<p class="text-[11px] text-urgent mt-1">{{ error }}</p>{% endfor %}
+      </div>
+      <div>
+        <label class="text-xs font-medium text-navy-400">Opening date (optional)</label>
+        {{ form.opening_date|add_class:"input input-bordered input-sm w-full mt-1" }}
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="text-xs font-medium text-navy-400">Source portal</label>
+        {{ form.source_portal|add_class:"input input-bordered input-sm w-full mt-1" }}
+      </div>
+      <div>
+        <label class="text-xs font-medium text-navy-400">Source URL</label>
+        {{ form.source_url|add_class:"input input-bordered input-sm w-full mt-1" }}
+      </div>
+    </div>
+
+    <button type="submit" class="btn bg-go text-white border-none hover:bg-go-600 w-full">Add tender</button>
+  </form>
+</div>
+{% endblock %}

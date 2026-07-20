@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+  <div class="flex flex-wrap items-end justify-between gap-4 mb-6">
+    <div>
+      <p class="text-xs font-semibold tracking-widest text-royal uppercase mb-1">Live Overview</p>
+      <h1 class="font-display font-800 text-2xl lg:text-3xl text-navy">Buying opportunities at a glance</h1>
+    </div>
+    <a href="{% url 'tenders:tender_list' %}" class="btn bg-navy text-white border-none hover:bg-navy-400">Browse all tenders →</a>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="stat-card bg-white rounded-xl p-5 border border-navy-100">
+      <p class="text-xs text-navy-400 font-medium">Total tenders tracked</p>
+      <p class="font-display font-800 text-3xl text-navy mt-1">{{ stats.total_tenders }}</p>
+      <p class="text-xs text-go-600 mt-2">{{ stats.open_tenders }} currently open</p>
+    </div>
+    <div class="stat-card bg-white rounded-xl p-5 border border-navy-100">
+      <p class="text-xs text-navy-400 font-medium">Expiring within 3 days</p>
+      <p class="font-display font-800 text-3xl text-urgent mt-1 flex items-center gap-2">
+        {{ stats.expiring_soon_count }}
+        {% if stats.expiring_soon_count > 0 %}<span class="w-2.5 h-2.5 rounded-full bg-urgent pulse-dot"></span>{% endif %}
+      </p>
+      <p class="text-xs text-navy-400 mt-2">Act fast — deadlines closing</p>
+    </div>
+    <div class="stat-card bg-white rounded-xl p-5 border border-navy-100">
+      <p class="text-xs text-navy-400 font-medium">Upcoming in 30 days</p>
+      <p class="font-display font-800 text-3xl text-royal mt-1">{{ stats.upcoming_30_days }}</p>
+      <p class="text-xs text-navy-400 mt-2">Plan your pipeline</p>
+    </div>
+    <div class="stat-card bg-white rounded-xl p-5 border border-navy-100">
+      <p class="text-xs text-navy-400 font-medium">Open tender value</p>
+      <p class="font-display font-800 text-3xl text-navy mt-1">₹{{ stats.open_estimated_value|floatformat:0|intcomma }}</p>
+      <p class="text-xs text-navy-400 mt-2">Across all open bids</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-display font-700 text-navy">Deadlines — next 14 days</h2>
+        <span class="text-xs text-navy-400">Count of bids closing per day</span>
+      </div>
+      <canvas id="deadlineChart" height="110"></canvas>
+    </div>
+    <div class="bg-white rounded-xl border border-navy-100 p-5">
+      <h2 class="font-display font-700 text-navy mb-3">By category</h2>
+      <canvas id="categoryChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white rounded-xl border border-navy-100 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-display font-700 text-navy">Upcoming deadlines</h2>
+        <a href="{% url 'tenders:tender_list' %}?sort=deadline" class="text-xs text-royal hover:underline">View all</a>
+      </div>
+      <div class="space-y-3">
+        {% for t in upcoming_deadlines %}
+        <a href="{% url 'tenders:tender_detail' t.id %}" class="flex items-center gap-4 p-3 rounded-lg hover:bg-navy-50 border border-transparent hover:border-navy-100">
+          <div class="w-11 h-11 rounded-lg grid place-items-center shrink-0 {% if t.status == 'expiring_soon' %}bg-urgent-50 text-urgent{% else %}bg-royal-50 text-royal{% endif %} font-display font-800 text-sm">
+            {{ t.days_remaining }}d
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-navy truncate">{{ t.title }}</p>
+            <p class="text-xs text-navy-400 ref-mono">{{ t.reference_no }} · {{ t.department }}</p>
+          </div>
+          <span class="badge badge-outline border-navy-100 text-navy-400 text-xs">{{ t.category }}</span>
+        </a>
+        {% empty %}
+        <p class="text-sm text-navy-400 py-6 text-center">No tenders yet — run the scraper or seed sample data to get started.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-navy-100 p-5">
+      <h2 class="font-display font-700 text-navy mb-4">Top states</h2>
+      <div class="space-y-2">
+        {% for row in stats.top_states %}
+        <div class="flex items-center gap-3 text-sm">
+          <span class="w-28 truncate text-navy-400">{{ row.state }}</span>
+          <div class="flex-1 h-2 bg-navy-50 rounded-full overflow-hidden">
+            <div class="h-full bg-royal rounded-full" style="width: {% widthratio row.count stats.total_tenders 100 %}%"></div>
+          </div>
+          <span class="w-6 text-right font-semibold text-navy">{{ row.count }}</span>
+        </div>
+        {% empty %}
+        <p class="text-sm text-navy-400">No data yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  const deadlineData = {{ stats.deadline_calendar|safe }};
+  const categoryData = {{ stats.category_breakdown|safe }};
+
+  new Chart(document.getElementById('deadlineChart'), {
+    type: 'bar',
+    data: {
+      labels: deadlineData.map(d => new Date(d.date).toLocaleDateString('en-IN', {day:'2-digit', month:'short'})),
+      datasets: [{
+        label: 'Deadlines',
+        data: deadlineData.map(d => d.count),
+        backgroundColor: deadlineData.map((d,i) => i < 4 ? '#F97316' : '#1E40AF'),
+        borderRadius: 5,
+        maxBarThickness: 22,
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: categoryData.map(c => c.category),
+      datasets: [{
+        data: categoryData.map(c => c.count),
+        backgroundColor: ['#0A2540','#1E40AF','#10B981','#F97316','#3B5BDB','#0E9F71','#264D73','#EA660A','#94A3B8','#6366F1','#059669'],
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+    }
+  });
+</script>
+{% endblock %}

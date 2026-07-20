@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="fade-in max-w-md mx-auto mt-8">
+  <div class="text-center mb-6">
+    <div class="w-12 h-12 rounded-xl bg-go grid place-items-center font-display font-800 text-navy text-xl mx-auto mb-3">T</div>
+    <h1 class="font-display font-800 text-2xl text-navy">Create your account</h1>
+    <p class="text-sm text-navy-400 mt-1">Save searches and get bid deadline reminders by email.</p>
+  </div>
+
+  <form method="post" class="bg-white rounded-xl border border-navy-100 p-6 space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <div>
+      <label class="text-xs font-medium text-navy-400">{{ field.label }}</label>
+      {{ field|add_class:"input input-bordered w-full mt-1" }}
+      {% if field.help_text %}<p class="text-[11px] text-navy-400 mt-1">{{ field.help_text }}</p>{% endif %}
+      {% for error in field.errors %}<p class="text-[11px] text-urgent mt-1">{{ error }}</p>{% endfor %}
+    </div>
+    {% endfor %}
+    <button type="submit" class="btn bg-go text-white border-none hover:bg-go-600 w-full">Create account</button>
+  </form>
+  <p class="text-center text-sm text-navy-400 mt-4">
+    Already have an account? <a href="{% url 'users:login' %}" class="text-royal hover:underline">Sign in</a>
+  </p>
+</div>
+{% endblock %}

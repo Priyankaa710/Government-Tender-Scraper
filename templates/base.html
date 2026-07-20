@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="tendertrail">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Tender Trail{% endblock %} · Tender Trail</title>
+<meta name="description" content="Government Tender Scraper and Buying Opportunity Notifier">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          display: ['Manrope', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          navy: { DEFAULT: '#0A2540', 50: '#EAF0F6', 100: '#CBDAE7', 400: '#264D73', 600: '#0A2540', 900: '#061627' },
+          royal: { DEFAULT: '#1E40AF', 50: '#EEF2FF', 400: '#3B5BDB', 600: '#1E40AF' },
+          go: { DEFAULT: '#10B981', 50: '#ECFDF5', 600: '#0E9F71' },
+          urgent: { DEFAULT: '#F97316', 50: '#FFF7ED', 600: '#EA660A' },
+        },
+      },
+    },
+  }
+</script>
+<style>
+  [data-theme="tendertrail"] { color-scheme: light; }
+  body { background:
+    radial-gradient(1200px 500px at 100% -10%, rgba(30,64,175,0.06), transparent),
+    #F6F8FB;
+  }
+  .grid-seam {
+    background-image: linear-gradient(rgba(10,37,64,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(10,37,64,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .stat-card { transition: transform .18s ease, box-shadow .18s ease; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -12px rgba(10,37,64,0.25); }
+  .pulse-dot { animation: pulse-glow 1.8s ease-in-out infinite; }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(249,115,22,0.45); }
+    50% { box-shadow: 0 0 0 6px rgba(249,115,22,0); }
+  }
+  .ref-mono { font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #CBDAE7; border-radius: 8px; }
+  .fade-in { animation: fadeIn .35s ease both; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px);} to {opacity:1; transform:none;} }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body class="font-sans text-navy-600 min-h-screen">
+
+<div class="flex min-h-screen">
+  <!-- Sidebar -->
+  <aside class="hidden lg:flex lg:flex-col w-64 shrink-0 bg-navy text-white sticky top-0 h-screen">
+    <div class="px-6 py-6 flex items-center gap-3 border-b border-white/10">
+      <div class="w-9 h-9 rounded-lg bg-go grid place-items-center font-display font-800 text-navy text-lg">T</div>
+      <div>
+        <p class="font-display font-800 text-lg leading-none">Tender Trail</p>
+        <p class="text-[11px] text-white/50 mt-1 tracking-wide">BUYING OPPORTUNITY NOTIFIER</p>
+      </div>
+    </div>
+    <nav class="flex-1 px-3 py-6 space-y-1 text-sm">
+      <a href="{% url 'tenders:dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 {% if request.resolver_match.url_name == 'dashboard' %}bg-white/10 font-semibold{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+        Dashboard
+      </a>
+      <a href="{% url 'tenders:tender_list' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 {% if request.resolver_match.url_name == 'tender_list' %}bg-white/10 font-semibold{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
+        Browse Tenders
+        {% if nav_expiring_count %}<span class="ml-auto text-[11px] bg-urgent text-white rounded-full px-2 py-0.5">{{ nav_expiring_count }}</span>{% endif %}
+      </a>
+      {% if user.is_authenticated %}
+      <a href="{% url 'tenders:tender_create' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 {% if request.resolver_match.url_name == 'tender_create' %}bg-white/10 font-semibold{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+        Add Tender
+      </a>
+      <a href="{% url 'tenders:watchlist' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 {% if request.resolver_match.url_name == 'watchlist' %}bg-white/10 font-semibold{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+        My Watchlist
+      </a>
+      <a href="{% url 'tenders:alert_preferences' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 {% if request.resolver_match.url_name == 'alert_preferences' %}bg-white/10 font-semibold{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+        Alert Preferences
+      </a>
+      {% endif %}
+      <a href="/admin/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+        Admin Panel
+      </a>
+    </nav>
+    <div class="px-4 py-5 border-t border-white/10 text-xs text-white/50">
+      Multi-portal sync · every {{ SCRAPER_INTERVAL_HOURS|default:"24" }}h
+    </div>
+  </aside>
+
+  <!-- Main column -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <!-- Topbar -->
+    <header class="sticky top-0 z-30 bg-white/85 backdrop-blur border-b border-navy-100 px-4 lg:px-8 py-3 flex items-center gap-4">
+      <a href="{% url 'tenders:dashboard' %}" class="lg:hidden font-display font-800 text-navy flex items-center gap-2">
+        <span class="w-7 h-7 rounded bg-go grid place-items-center text-white text-sm">T</span> Tender Trail
+      </a>
+      <form action="{% url 'tenders:tender_list' %}" method="get" class="hidden md:flex flex-1 max-w-xl">
+        <label class="input input-bordered flex items-center gap-2 w-full bg-navy-50/60 border-navy-100">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-navy-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" /></svg>
+          <input type="text" name="q" placeholder="Search tenders, departments, reference numbers…" class="grow bg-transparent text-sm focus:outline-none" />
+        </label>
+      </form>
+      <div class="ml-auto flex items-center gap-3">
+        {% if user.is_authenticated %}
+          <a href="{% url 'tenders:tender_list' %}" class="hidden sm:inline-flex btn btn-sm bg-go border-none text-white hover:bg-go-600">Browse Tenders</a>
+          <div class="dropdown dropdown-end">
+            <label tabindex="0" class="w-9 h-9 rounded-full bg-royal text-white grid place-items-center font-semibold cursor-pointer">
+              {{ user.username|slice:":1"|upper }}
+            </label>
+            <ul tabindex="0" class="dropdown-content menu mt-2 p-2 shadow-lg bg-white rounded-box w-52 border border-navy-100 z-50">
+              <li class="px-3 py-1 text-xs text-navy-400">Signed in as <span class="font-semibold text-navy">{{ user.username }}</span></li>
+              <li><a href="{% url 'tenders:watchlist' %}">My watchlist</a></li>
+              <li><a href="{% url 'tenders:alert_preferences' %}">Alert preferences</a></li>
+              <li><a href="{% url 'users:logout' %}">Sign out</a></li>
+            </ul>
+          </div>
+        {% else %}
+          <a href="{% url 'users:login' %}" class="btn btn-sm btn-ghost">Sign in</a>
+          <a href="{% url 'users:register' %}" class="btn btn-sm bg-navy border-none text-white hover:bg-navy-400">Create account</a>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if messages %}
+    <div class="px-4 lg:px-8 pt-4 space-y-2">
+      {% for message in messages %}
+      <div class="alert {% if message.tags == 'success' %}bg-go-50 text-go-600 border border-go/30{% else %}bg-urgent-50 text-urgent-600 border border-urgent/30{% endif %} text-sm py-2 fade-in">
+        <span>{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-1 px-4 lg:px-8 py-6">
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="px-4 lg:px-8 py-6 text-xs text-navy-400 border-t border-navy-100 mt-auto">
+      Tender Trail — Government Tender Scraper and Buying Opportunity Notifier. Sample/demo data sourced from public portal patterns.
+    </footer>
+  </div>
+</div>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>
