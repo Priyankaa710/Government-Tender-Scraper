@@ -92,8 +92,6 @@ MONGO_PASSWORD = os.getenv("MONGO_PASSWORD") or None
 
 MONGO_URI = os.getenv("MONGO_URI")
 
-MONGO_URI = os.getenv("MONGO_URI")
-
 mongoengine.connect(host=MONGO_URI)
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
