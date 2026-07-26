@@ -90,15 +90,11 @@ MONGO_DB_NAME = os.getenv("MONGO_DB_NAME", "tender_trail")
 MONGO_USERNAME = os.getenv("MONGO_USERNAME") or None
 MONGO_PASSWORD = os.getenv("MONGO_PASSWORD") or None
 
-mongoengine.connect(
-    db=MONGO_DB_NAME,
-    host=MONGO_HOST,
-    port=MONGO_PORT,
-    username=MONGO_USERNAME,
-    password=MONGO_PASSWORD,
-    authentication_source="admin" if MONGO_USERNAME else None,
-)
+MONGO_URI = os.getenv("MONGO_URI")
 
+MONGO_URI = os.getenv("MONGO_URI")
+
+mongoengine.connect(host=MONGO_URI)
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
