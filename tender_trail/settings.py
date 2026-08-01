@@ -146,6 +146,9 @@ SIMPLE_JWT = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # --- Email / Alert Engine ----------------------------------------------------
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
