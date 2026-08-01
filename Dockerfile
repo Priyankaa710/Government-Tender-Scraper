@@ -18,4 +18,4 @@ RUN mkdir -p /app/logs /app/media /app/staticfiles
 
 EXPOSE 8000
 
-CMD ["gunicorn", "tender_trail.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3"]
+CMD sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn tender_trail.wsgi:application --bind 0.0.0.0:8000 --workers 3"
