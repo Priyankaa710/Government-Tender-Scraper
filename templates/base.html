@@ -126,8 +126,14 @@
               <li class="px-3 py-1 text-xs text-navy-400">Signed in as <span class="font-semibold text-navy">{{ user.username }}</span></li>
               <li><a href="{% url 'tenders:watchlist' %}">My watchlist</a></li>
               <li><a href="{% url 'tenders:alert_preferences' %}">Alert preferences</a></li>
-              <li><a href="{% url 'users:logout' %}">Sign out</a></li>
-            </ul>
+              <li>
+                  <form method="post" action="{% url 'users:logout' %}">
+                      {% csrf_token %}
+                      <button type="submit" class="w-full text-left px-4 py-2 hover:bg-base-200">
+                          Sign out
+                      </button>
+                  </form>
+              </li>            </ul>
           </div>
         {% else %}
           <a href="{% url 'users:login' %}" class="btn btn-sm btn-ghost">Sign in</a>
