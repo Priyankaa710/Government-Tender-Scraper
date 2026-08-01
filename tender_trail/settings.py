@@ -20,8 +20,17 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-key-change-me")
-DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = os.getenv(
+    "DJANGO_ALLOWED_HOSTS",
+    "localhost,127.0.0.1,government-tender-scraper.onrender.com"
+).split(",")
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://government-tender-scraper.onrender.com",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -40,7 +49,6 @@ INSTALLED_APPS = [
     "users",
     "scraper",
 ]
-
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
