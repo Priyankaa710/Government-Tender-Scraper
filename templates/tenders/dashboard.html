@@ -34,8 +34,9 @@
     </div>
     <div class="stat-card bg-white rounded-xl p-5 border border-navy-100">
       <p class="text-xs text-navy-400 font-medium">Open tender value</p>
-      <p class="font-display font-800 text-3xl text-navy mt-1">₹{{ stats.open_estimated_value|floatformat:0|intcomma }}</p>
-      <p class="text-xs text-navy-400 mt-2">Across all open bids</p>
+<p class="font-display font-800 text-xl sm:text-2xl lg:text-3xl text-navy mt-1 break-all">
+    ₹{{ stats.open_estimated_value|floatformat:0|intcomma }}
+</p>      <p class="text-xs text-navy-400 mt-2">Across all open bids</p>
     </div>
   </div>
 
